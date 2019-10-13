@@ -1,25 +1,1 @@
-import requests 
-from bs4 import BeautifulSoup
-import re
-
-url=r'http://www.espncricinfo.com/ci/engine/series/index.html'
-url_root=r'http://www.espncricinfo.com/'
-url_static=r'static.espncricinfo.com'
-
-def GetSeasons(url):
-    links_final=[]
-    r = requests.get(url)
-    soup = BeautifulSoup(r.content, 'html5lib')
-    links = soup.findAll('a', href=True)
-    links_final=[]
-    for link in links:
-        if 'ARCHIVE' in str(link):
-            links_final.append(url_static + link['href'])
-        else:
-            links_final.append (url_root + link['href'])    
-    return(links_final)
-
-
-links_seasons = GetSeasons(url)
-
-for l in links_seasons: print (l)
+import requests from bs4 import BeautifulSoupimport reurl=r'http://www.espncricinfo.com/ci/engine/series/index.html'url_root=r'http://www.espncricinfo.com/'url_static=r'static.espncricinfo.com'def GetSeasons(url):    links_final=[]    r = requests.get(url)    soup = BeautifulSoup(r.content, 'html5lib')    links = soup.findAll('a', href=True)    links_final=[]    for link in links:        if 'ARCHIVE' in str(link):            links_final.append(url_static + link['href'])        elif 'season=' and 'view=season' in str(link):            links_final.append (url_root + link['href'])        return(links_final)def GetTournamentsRecursively(season):    matches=[]        print('Getting data for season: {0}'.format(season))    r=requests.get(season)    soup=BeautifulSoup(r.content, 'html5lib')    links=soup.find_all('a', href=True)        if links is None or len(links) is not 0:        matches.append(season)    else:        matches.append(season)           for l in links:            GetMatchesRecursively(season + l['href'])    return matcheslinks_seasons = GetSeasons(url)del links_seasons[0]tours=[]for season in links_seasons:    details = GetTournamentsRecursively(season)    print (details)    tours.append(details)        
