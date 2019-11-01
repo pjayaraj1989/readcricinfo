@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import lxml.html
 from lxml import etree
 from lxml import html
-import pandas as pd
 
 def GetTournaments(year):
 	tours=[]
@@ -33,10 +32,28 @@ def GetScoreCards(year):
 				scorecards.append(final_url)
 	return scorecards
 
+required = 'tendulkar'
+
 year='2011'
 scores=GetScoreCards(year)
-print (scores)
+print (scores[0])
+request = requests.get(scores[0])
 
-resp = requests.get(scores[0])
-tree=html.fromstring(resp.content)
+soup = BeautifulSoup(request.text, 'html.parser')
+output_entries = []
+ids = ["innings_1","innings_2","innings_3","innings_4"]
+for id in ids:
+	s = soup.find(id=id)
+	#print (s.prettify())
+	if s is not None:
+		text = s.get_text(separator='')
+		output = text.split('Extras')[0]
+		output = output.split('Batsman')[-1]
+		output = output.split('R B 4s 6s SR')[-1]
+		lines=output.split('      ')
+		for line in lines:
+			output_entries.append(line)
 
+for entry in output_entries:
+	if required in entry.lower():
+		print (entry)
