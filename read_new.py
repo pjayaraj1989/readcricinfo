@@ -6,6 +6,8 @@ import lxml.html
 from lxml import etree
 from lxml import html
 
+year='2011'
+
 def GetTournaments(year):
 	tours=[]
 	dom = lxml.html.fromstring(requests.get(url_archives).content)
@@ -32,28 +34,27 @@ def GetScoreCards(year):
 				scorecards.append(final_url)
 	return scorecards
 
-required = 'tendulkar'
+def GetDismissals(player):
+	output_entries = []
+	scores=GetScoreCards(year)	
+	for score in scores:
+		#print (score)
+		request = requests.get(score)
+		soup = BeautifulSoup(request.text, 'html.parser')	
+		ids = ["innings_1","innings_2","innings_3","innings_4"]
+		for id in ids:
+			s = soup.find(id=id)
+			if s is not None:
+				text = s.get_text(separator='')
+				output = text.split('Extras')[0]
+				output = output.split('Batsman')[-1]
+				output = output.split('R B 4s 6s SR')[-1]
+				lines=output.split('      ')
+				for line in lines:
+					if player in line.lower():
+						output_entries.append(line)
+	return output_entries
 
-year='2011'
-scores=GetScoreCards(year)
-print (scores[0])
-request = requests.get(scores[0])
-
-soup = BeautifulSoup(request.text, 'html.parser')
-output_entries = []
-ids = ["innings_1","innings_2","innings_3","innings_4"]
-for id in ids:
-	s = soup.find(id=id)
-	#print (s.prettify())
-	if s is not None:
-		text = s.get_text(separator='')
-		output = text.split('Extras')[0]
-		output = output.split('Batsman')[-1]
-		output = output.split('R B 4s 6s SR')[-1]
-		lines=output.split('      ')
-		for line in lines:
-			output_entries.append(line)
-
-for entry in output_entries:
-	if required in entry.lower():
-		print (entry)
+entries = GetDismissals('sachin tendulkar')
+for entry in entries:
+	print (entry)
