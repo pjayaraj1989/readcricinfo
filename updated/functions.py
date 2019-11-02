@@ -61,12 +61,22 @@ def GetDismissals(player, scores):
 	#remove duplicate entries
 	output_entries = RemoveDuplicates(output_entries)
 	return output_entries
+
+def RemoveStrayChars(entry, stray_strings):
+	for s in stray_strings:
+		if s in entry:
+			entry = entry.replace(s, ' ').lstrip(' ')
+	return entry
 	
 def ProcessDismissal(player, dismissals):
 	output={}
 	for dismissal in dismissals:
 		temp = dismissal.lower().split(player)[-1]
 		temp=temp.lstrip(' ')
+		#remove stray entries like (c), (wk), (c & wk)
+		
+		temp = RemoveStrayChars(temp, ['(c)','(wk)','(c & wk)'])
+		
 		token=r'[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+.[\d]+'
 		stats = re.findall(token, temp)[0]
 		if stats in temp:
