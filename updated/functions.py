@@ -6,6 +6,7 @@ import lxml.html
 from lxml import etree
 from lxml import html
 import re
+from collections import Counter
 
 #remove duplicate entries
 def RemoveDuplicates(mylist):
@@ -65,7 +66,7 @@ def GetDismissals(player, scores):
 def RemoveStrayChars(entry, stray_strings):
 	for s in stray_strings:
 		if s in entry:
-			entry = entry.replace(s, ' ').lstrip(' ')
+			entry = entry.replace(s, ' ').lstrip(' ').rstrip(' ')
 	return entry
 	
 def ProcessDismissal(player, dismissals):
@@ -73,15 +74,20 @@ def ProcessDismissal(player, dismissals):
 	for dismissal in dismissals:
 		temp = dismissal.lower().split(player)[-1]
 		temp=temp.lstrip(' ')
-		#remove stray entries like (c), (wk), (c & wk)
-		
-		temp = RemoveStrayChars(temp, ['(c)','(wk)','(c & wk)'])
-		
+		#remove stray entries		
+		temp = RemoveStrayChars(temp, ['(c)','(wk)','(c & wk)'])		
 		token=r'[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+.[\d]+'
 		stats = re.findall(token, temp)[0]
 		if stats in temp:
 			mode_of_dismissal = temp.split(stats)[0]
-			print (mode_of_dismissal)
+			#print (mode_of_dismissal)
 			output[mode_of_dismissal] = stats
 	return output
-				
+
+def GetBowlers(dismissals):
+	bowlers=[]
+	for k in dismissals.keys():
+		if ' b ' in k:
+			bowlers.append(k.split(' b ')[-1])	
+	d = Counter(bowlers)	
+	return (d)

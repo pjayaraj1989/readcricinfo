@@ -9,4 +9,15 @@ scores = GetScoreCards(tournaments, years)
 dismissals = GetDismissals(player, scores)
 #process each dismissal
 dismissals = ProcessDismissal(player, dismissals)
-print (dismissals)
+
+bowlers = GetBowlers(dismissals)
+print (bowlers)
+
+'''
+bowlers=[]
+for k in dismissals.keys():
+	if ' b ' in k:
+		bowlers.append(k.split(' b ')[-1])
+		
+print (bowlers)
+'''
