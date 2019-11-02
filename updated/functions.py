@@ -63,8 +63,15 @@ def GetDismissals(player, scores):
 	return output_entries
 	
 def ProcessDismissal(player, dismissals):
-	output=[]
+	output={}
 	for dismissal in dismissals:
 		temp = dismissal.lower().split(player)[-1]
 		temp=temp.lstrip(' ')
-		print (temp)
+		token=r'[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+.[\d]+'
+		stats = re.findall(token, temp)[0]
+		if stats in temp:
+			mode_of_dismissal = temp.split(stats)[0]
+			print (mode_of_dismissal)
+			output[mode_of_dismissal] = stats
+	return output
+				
