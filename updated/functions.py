@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import lxml.html
 from lxml import etree
 from lxml import html
+import re
 
 #remove duplicate entries
 def RemoveDuplicates(mylist):
@@ -18,11 +19,10 @@ def GetTournaments(years):
 		link=url_root+x
 		for year in years:
 			if year in str(link):
-				#print (link)
+				print ('Checking year ' + year)
 				dom = lxml.html.fromstring(requests.get(link).content)
 				for x in dom.xpath('//a/@href'):
 					if year in str(x):
-						#print (url_root + x)
 						tours.append(url_root + x)
 	tours=RemoveDuplicates(tours)
 	return tours
@@ -35,16 +35,14 @@ def GetScoreCards(tours, years):
 			for year in years:
 				if 'cricket-scores' in str(x) and year in str(x):
 					final_url = (url_root + x).replace('cricket-scores', 'live-cricket-scorecard')
-					#print (final_url)
 					scorecards.append(final_url)
 	scorecards=RemoveDuplicates(scorecards)
 	return scorecards
 	
 def GetDismissals(player, scores):
-	print ('Getting data for player ' + player)
+	print ('Getting dismissals for player ' + player)
 	output_entries = []
 	for score in scores:
-		#print (score)
 		request = requests.get(score)
 		soup = BeautifulSoup(request.text, 'html.parser')	
 		ids = ["innings_1","innings_2","innings_3","innings_4"]
@@ -57,9 +55,16 @@ def GetDismissals(player, scores):
 				output = output.split('R B 4s 6s SR')[-1]
 				lines=output.split('      ')
 				for line in lines:
-					if player in line.lower():
+					if line.lstrip().lower().startswith(player):
 						print ('Found in ' + score)
 						output_entries.append(line)						
 	#remove duplicate entries
-	output_entries = list(dict.fromkeys(output_entries))
+	output_entries = RemoveDuplicates(output_entries)
 	return output_entries
+	
+def ProcessDismissal(player, dismissals):
+	output=[]
+	for dismissal in dismissals:
+		temp = dismissal.lower().split(player)[-1]
+		temp=temp.lstrip(' ')
+		print (temp)
