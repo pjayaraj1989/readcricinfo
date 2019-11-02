@@ -6,7 +6,24 @@ import lxml.html
 from lxml import etree
 from lxml import html
 
-year='2011'
+year='2003'
+
+ipl=['-indian-premier-league-']
+
+others=[
+	'-all-stars-series-', 
+	'-practice-matches-'
+	'-warm-up-matches-'
+]
+international_odi=[
+	'-tour-of-',
+	'-world-cup-',
+	'icc',
+]
+international_t20=[
+	'-t20-',
+	'icc',
+]
 
 def GetTournaments(year):
 	tours=[]
@@ -52,7 +69,10 @@ def GetDismissals(player):
 				lines=output.split('      ')
 				for line in lines:
 					if player in line.lower():
-						output_entries.append(line)
+						print ('Found in ' + score)
+						output_entries.append(line)						
+	#remove duplicate entries
+	output_entries = list(dict.fromkeys(output_entries))
 	return output_entries
 
 entries = GetDismissals('sachin tendulkar')
