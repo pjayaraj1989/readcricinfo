@@ -8,6 +8,10 @@ from lxml import html
 import re
 from collections import Counter
 
+def Error_Exit(msg):
+	print(msg)
+	exit()
+
 #remove duplicate entries
 def RemoveDuplicates(mylist):
 	output_entries = list(dict.fromkeys(mylist))
@@ -16,6 +20,8 @@ def RemoveDuplicates(mylist):
 def GetTournaments(years):
 	tours=[]
 	dom = lxml.html.fromstring(requests.get(url_archives).content)
+	if dom is None:	Error_Exit('No data read')
+	if len(dom.xpath('//a/@href')) is 0:	Error_Exit('No links found')	
 	for x in dom.xpath('//a/@href'):
 		link=url_root+x
 		for year in years:
@@ -25,6 +31,7 @@ def GetTournaments(years):
 				for x in dom.xpath('//a/@href'):
 					if year in str(x):
 						tours.append(url_root + x)
+	if len(tours) is 0:	Error_Exit('No tournaments found')
 	tours=RemoveDuplicates(tours)
 	return tours
 	
@@ -91,3 +98,4 @@ def GetBowlers(dismissals):
 			bowlers.append(k.split(' b ')[-1])	
 	d = Counter(bowlers)	
 	return (d)
+
