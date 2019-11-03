@@ -41,11 +41,19 @@ def GetScoreCards(tours, years):
 		dom = lxml.html.fromstring(requests.get(tour).content)
 		for x in dom.xpath('//a/@href'):
 			for year in years:
-				if 'cricket-scores' in str(x) and year in str(x):
+				if 'cricket-scores' in str(x) or 'live-cricket-scorecard' in str(x) and year in str(x):
 					final_url = (url_root + x).replace('cricket-scores', 'live-cricket-scorecard')
 					scorecards.append(final_url)
 	scorecards=RemoveDuplicates(scorecards)
 	return scorecards
+
+def GetMatchesByType(scorecards, param):
+	output=[]
+	for scorecard in scorecards:
+		if param is 'test':
+			if 'test' in scorecard:
+				output.append(scorecard)
+	return output
 	
 def GetDismissals(player, scores):
 	print ('Getting dismissals for player ' + player)
@@ -65,7 +73,7 @@ def GetDismissals(player, scores):
 				for line in lines:
 					if line.lstrip().lower().startswith(player):
 						print ('Found in ' + score)
-						output_entries.append(line)						
+						output_entries.append(line)					
 	#remove duplicate entries
 	output_entries = RemoveDuplicates(output_entries)
 	return output_entries
@@ -77,8 +85,9 @@ def RemoveStrayChars(entry, stray_strings):
 	return entry
 	
 def ProcessDismissal(player, dismissals):
-	output={}
+	output=[]
 	for dismissal in dismissals:
+		entry=[]
 		temp = dismissal.lower().split(player)[-1]
 		temp=temp.lstrip(' ')
 		#remove stray entries		
@@ -87,15 +96,31 @@ def ProcessDismissal(player, dismissals):
 		stats = re.findall(token, temp)[0]
 		if stats in temp:
 			mode_of_dismissal = temp.split(stats)[0]
-			#print (mode_of_dismissal)
-			output[mode_of_dismissal] = stats
+			entry.append(mode_of_dismissal)
+			entry.append(stats)
+			output.append(entry)
+			#output[mode_of_dismissal] = stats
 	return output
+
+def GetStatistics(dismissals_processed):
+	runs=0
+	for d in dismissals_processed:
+		run = d[-1].split(' ')[0]
+		runs += int(run)	
+	return runs
 
 def GetBowlers(dismissals):
 	bowlers=[]
-	for k in dismissals.keys():
-		if ' b ' in k:
-			bowlers.append(k.split(' b ')[-1])	
-	d = Counter(bowlers)	
-	return (d)
-
+	for d in dismissals:
+		if ' b ' in d[0]:
+			bowlers.append(d[0].split(' b ')[-1])	
+		if 'run out' in d[0]:
+			bowlers.append('run out')
+		if 'not out' in d[0]:
+			bowlers.append('not out')
+	
+	print (bowlers)
+	'''
+	c = Counter(bowlers)
+	return (c)
+	'''
