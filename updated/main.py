@@ -1,9 +1,9 @@
 from functions import*
 
-years_range = range(2011,2015)
+years_range = range(2014,2015)
 years = [str(year) for year in years_range]
 
-player = 'ed cowan'
+player = 'mitchell starc'
 tournaments = GetTournaments(years)
 scores = GetScoreCards(tournaments, years)
      
@@ -15,10 +15,10 @@ dismissals = GetDismissals(player, scores)
 #process each dismissal
 dismissals = ProcessDismissal(player, dismissals)
 
-print (len(dismissals))
-op = GetStatistics(dismissals)
-print (op)
+print ('{0} Dismissals'.format(str (len(dismissals))))
+for d in dismissals:    print (d)
 
-'''
-bowlers = GetBowlers(dismissals)
-'''
+op = GetStatistics(dismissals)
+print ('Total Runs: {0}'.format(op))
+
+#bowlers = GetBowlers(dismissals)

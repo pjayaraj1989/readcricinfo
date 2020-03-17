@@ -56,27 +56,28 @@ def GetMatchesByType(scorecards, param):
 	return output
 	
 def GetDismissals(player, scores):
-	print ('Getting dismissals for player ' + player)
-	output_entries = []
-	for score in scores:
-		request = requests.get(score)
-		soup = BeautifulSoup(request.text, 'html.parser')	
-		ids = ["innings_1","innings_2","innings_3","innings_4"]
-		for id in ids:
-			s = soup.find(id=id)
-			if s is not None:
-				text = s.get_text(separator='')
-				output = text.split('Extras')[0]
-				output = output.split('Batsman')[-1]
-				output = output.split('R B 4s 6s SR')[-1]
-				lines=output.split('      ')
-				for line in lines:
-					if line.lstrip().lower().startswith(player):
-						print ('Found in ' + score)
-						output_entries.append(line)					
-	#remove duplicate entries
-	output_entries = RemoveDuplicates(output_entries)
-	return output_entries
+    print ('Getting dismissals for player ' + player)
+    output_entries = []
+    for score in scores:
+        request = requests.get(score)
+        soup = BeautifulSoup(request.text, 'html.parser')
+        ids = ["innings_1","innings_2","innings_3","innings_4"]
+        for id in ids:
+            s = soup.find(id=id)
+            if s is not None:
+                text = s.get_text(separator='')
+                output = text.split('Extras')[0]
+                output = output.split('Batsman')[-1]
+                output = output.split('R B 4s 6s SR')[-1]
+                lines=output.split('      ')
+                for line in lines:
+                    if line.lstrip().lower().startswith(player):
+                        print ('Found in ' + score)
+                        output_entries.append(line)
+    if len(output_entries) == 0 or output_entries == []:    Error_Exit('No data found for player: {0}'.format(player))
+    #remove duplicate entries
+    output_entries = RemoveDuplicates(output_entries)
+    return output_entries
 
 def RemoveStrayChars(entry, stray_strings):
 	for s in stray_strings:
@@ -85,22 +86,23 @@ def RemoveStrayChars(entry, stray_strings):
 	return entry
 	
 def ProcessDismissal(player, dismissals):
-	output=[]
-	for dismissal in dismissals:
-		entry=[]
-		temp = dismissal.lower().split(player)[-1]
-		temp=temp.lstrip(' ')
-		#remove stray entries		
-		temp = RemoveStrayChars(temp, ['(c)','(wk)','(c & wk)'])		
-		token=r'[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+.[\d]+'
-		stats = re.findall(token, temp)[0]
-		if stats in temp:
-			mode_of_dismissal = temp.split(stats)[0]
-			entry.append(mode_of_dismissal)
-			entry.append(stats)
-			output.append(entry)
-			#output[mode_of_dismissal] = stats
-	return output
+    output=[]
+    if len(dismissals) == 0 or dismissals == None:  Error_Exit('No dismissals data found!')
+    for dismissal in dismissals:
+        entry=[]
+        temp = dismissal.lower().split(player)[-1]
+        temp=temp.lstrip(' ')
+        #remove stray entries
+        temp = RemoveStrayChars(temp, ['(c)','(wk)','(c & wk)'])
+        token=r'[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+[\s]+[\d]+.[\d]+'
+        stats = re.findall(token, temp)[0]
+        if stats in temp:
+            mode_of_dismissal = temp.split(stats)[0]
+            entry.append(mode_of_dismissal)
+            entry.append(stats)
+            output.append(entry)
+            #output[mode_of_dismissal] = stats
+    return output
 
 def GetStatistics(dismissals_processed):
 	runs=0
